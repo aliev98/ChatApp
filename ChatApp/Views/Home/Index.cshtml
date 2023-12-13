@@ -1,0 +1,50 @@
+﻿
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<br/>
+<div id="bigContainer">
+
+<div id="chatContainer">
+<div>
+    <h3>Chat app by aliev98</h3>
+</div>
+    <input type="text" id="userInput" placeholder="Enter your name">
+    <br />
+    <textarea id="messageInput" placeholder="Type your message"></textarea>
+    <br />
+    <button id="sendButton">Send</button>
+    <hr />
+    <ul id="messagesList"></ul>
+</div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        $("#sendButton").click(function () {
+            var user = $("#userInput").val();
+            var message = $("#messageInput").val();
+            connection.invoke("SendMessage", user, message).catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            $("#messageInput").val("");
+        });
+
+        connection.on("ReceiveMessage", function (user, message) {
+            if(user !="" && message != "") $("#messagesList").append("<li><strong>" + user + ":</strong> " + message + "</li>");
+        });
+    });
+</script>
